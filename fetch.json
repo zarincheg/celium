@@ -1,0 +1,57 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Fetch Service request",
+    "description": "Request to fetching data",
+    "type": "object",
+    "properties" : {
+    	"fetcher": {
+    		"description": "The name of data fetcher",
+    		"enum": ["web", "miralab", "prcy"]
+    	},
+    	"params" : {
+    		"description": "Additional params for selected fetcher",
+    		"type": "object",
+    		"oneOf": [
+    			{
+                    "properties": {
+                        "key": {
+                            "description": "Key for check request status",
+                            "type": "string"
+                        },
+                        "url": {
+                            "description": "URL for the Web fetcher",
+                            "type": "string"
+                        }
+                    }
+                },{ 
+                    "properties": {
+                        "key": {
+                            "description": "Key for check request status",
+                            "type": "string"
+                        },
+                        "domain": {
+                            "description": "Domain name for the Miralab fetcher",
+                            "type": "string"
+                        },
+                        "keyword": {
+                            "description": "Search keyword for Yandex",
+                            "type": "string"
+                        }
+                    }
+                },{
+                    "properties": {
+                        "key": {
+                            "description": "Key for check request status",
+                            "type": "string"
+                        },
+                        "domain": {
+                            "description": "Domain name for the Prcy fetcher",
+                            "type": "string"
+                        }
+                    }
+                },
+    		]
+    	}
+    },
+    "required": ["fetcher", "params"]
+}
