@@ -1,7 +1,9 @@
 <?php
+namespace Communication;
 /**
  * Describes interface for Celium Nodes communication
  * Interface ServiceNode.
+ * @author Kirill Zorin <zarincheg@gmail.com>
  */
 interface CeliumNode {
 	/**
