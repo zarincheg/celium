@@ -1,6 +1,6 @@
 <?php
 
-namespace Gearman;
+namespace Services;
 
 
 class MongoWorker extends Worker {

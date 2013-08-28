@@ -30,9 +30,9 @@ class Rabbit {
 	}
 
 	/**
-	 * Инициализация очереди сообщений
-	 * @param string Название очереди
-	 * @param string Параметр, указвыающий тип действий с этой очередью. w - запись, r - чтение
+	 * AMQP queue initialization
+	 * @param string $name Queue name
+	 * @param string $mode Access mode: r is for reading and w is for writing
 	 * @return \AMQPQueue
 	 */
 	public function init($name, $mode = 'w') {
@@ -46,10 +46,19 @@ class Rabbit {
 		return $queue;
 	}
 
+	/**
+	 * @param $message
+	 * @param $key
+	 * @return bool
+	 */
 	public function write($message, $key) {
 		return $this->exchange->publish($message, $key);
 	}
 
+	/**
+	 * @param AMQPQueue $queue
+	 * @return bool|string
+	 */
 	public static function read(\AMQPQueue $queue) {
 		usleep(10000);
 		$envelope = $queue->get(AMQP_AUTOACK);

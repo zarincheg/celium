@@ -1,5 +1,5 @@
 <?php
-namespace Gearman;
+namespace Services;
 /**
  * Description of Worker
  * 

@@ -9,7 +9,7 @@ interface CeliumClient {
 	/**
 	 * Sending request to Celium Node for run action
 	 * @param string $request
-	 * @return bool
+	 * @return string Key of request. That's need for find results.
 	 */
 	public function sendRequest($request);
 

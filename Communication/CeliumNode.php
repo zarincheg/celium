@@ -28,7 +28,21 @@ interface CeliumNode {
 	/**
 	 * Checking completion and data ready
 	 * @param string $key Unique key for data that is results of action
-	 * @return bool
+	 * @return bool|array
 	 */
 	public function checkData($key);
+
+	/**
+	 * Add info about request in storage index.
+	 * It's for clients with the same requests, that can await results, but task for this request will not duplicated.
+	 * @param $key Unique key for request
+	 * @return bool
+	 */
+	public function addToIndex($key);
+
+	/**
+	 * @param $key
+	 * @return bool|array
+	 */
+	public function checkIndex($key);
 }

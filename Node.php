@@ -67,8 +67,9 @@ class Node {
 	private $storage = ['current' => false, 'precede' => false, 'meta' => false];
 
 	/**
-	 * @param string Название узла
-	 * @param string | bool Узел-родитель. Тот, к которому подключаемся. Если не указан, то текущий считается корневым.
+	 * @param string $name
+	 * @param string|bool $precede Узел-родитель. Тот, к которому подключаемся. Если не указан, то текущий считается корневым.
+	 * @throws AMQPConnectionException
 	 */
 	function __construct($name, $precede = false) {
 		$this->name = $name;

@@ -1,13 +1,9 @@
 <?php
 /**
- * Created by JetBrains PhpStorm.
- * User: zarin
- * Date: 5/7/13
- * Time: 6:12 PM
- * To change this template use File | Settings | File Templates.
+ * @author Kirill Zorin <zarincheg@gmail.com>
  */
 
-namespace Gearman;
+namespace Services;
 
 
 class MongoClient extends Client {

@@ -24,11 +24,11 @@ class Client extends \Services\Client {
 		$request = $this->node->request();
 
 		if(!$request) {
-			$this->logger->warn('Request was not received or is empty: '.(string) $request);
+			$this->logger->warn('Request was not received or is empty: '.(string) $request['body']);
 			return true;
 		}
 
-		$requestKey = md5($request);
+		$requestKey = $request['key'];
 		// Check the result data in the storage
 		$data = $this->node->checkData($requestKey);
 
@@ -38,7 +38,6 @@ class Client extends \Services\Client {
 			return true;
 		}
 
-		$request = json_decode($request, true);
 		$request['key'] = $requestKey;
 		$request = json_encode($request);
 
