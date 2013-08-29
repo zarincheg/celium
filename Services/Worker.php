@@ -42,7 +42,10 @@ class Worker extends \GearmanWorker {
 	}
 
 	public function process(\GearmanJob $job) {
-		$this->workload = json_decode($job->workload());
+		/*
+		 * @todo Schema validation
+		 */
+		$this->workload = json_decode($job->workload(), true);
 		$this->logger->debug('Workload: ' . $job->workload());
 		$this->logger->info('Task accepted. ID: ' . $this->id);
 

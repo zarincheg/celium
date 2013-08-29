@@ -175,14 +175,14 @@ class Pipeline implements CeliumNode, CeliumClient {
 	/**
 	 * Add info about request in storage index.
 	 * It's for clients with the same requests, that can await results, but task for this request will not duplicated.
-	 * @param string $requestKey
-	 * @param string $dataKey
+	 * @param string $childRequestKey
+	 * @param string $parentRequestKey
 	 * @internal param string $key Unique key for request
 	 * @return bool
 	 */
-	public function addToIndex($requestKey, $dataKey = null)
+	public function addToIndex($childRequestKey, $parentRequestKey = null)
 	{
-		$status = $this->indexCollection->insert(['request_key' => $requestKey, 'data_key' => $dataKey]);
+		$status = $this->indexCollection->insert(['request_key' => $childRequestKey, 'parent_request_key' => $parentRequestKey]);
 
 		if($status['ok'] !== 1)
 			return false;
@@ -191,11 +191,20 @@ class Pipeline implements CeliumNode, CeliumClient {
 	}
 
 	/**
+	 * Return indexed keys of requests related with request to parent node
+	 * @param string $parentRequestKey Ключ запроса к родительскому узлу
+	 * @return \MongoCursor
+	 */
+	public function getIndexByParent($parentRequestKey) {
+		return $this->indexCollection->find(['parent_request_key' => $parentRequestKey]);
+	}
+
+	/**
 	 * @param $key
 	 * @return bool|array
 	 */
 	public function checkIndex($key)
 	{
-		return $this->indexCollection->findOne(['key' => $key]);
+		return $this->indexCollection->findOne(['request_key' => $key]);
 	}
 }

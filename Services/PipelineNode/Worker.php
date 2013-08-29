@@ -1,5 +1,5 @@
 <?php
-namespace Services\PipelineRootNode;
+namespace Services\PipelineNode;
 use Communication\Pipeline;
 
 /**
@@ -40,17 +40,10 @@ class Worker extends \Services\Worker {
 		}
 
 		/**
-		 * @note Выбираем все ключи запросов дочерних узлов и шлем уведомления о завершении обработки
+		 * @note Здесь data_key используется для совместимости с PipelineNode.
 		 */
-		$index = $this->node->getIndexByParent($this->workload->key);
-
-		while($index->hasNext()) {
-			$keys = $index->getNext();
-			$notify = ['request_key' => $keys['request_key'], 'data_key' => $this->workload->key];
-			$this->node->notify(json_encode($notify));
-			$this->logger->info("Notification sent. Child request key: ". $keys['request_key']);
-		}
-
+		$notify = ['request_key' => $this->workload->key, 'data_key' => $this->workload->key];
+		$this->node->notify(json_encode($notify));
 		$this->logger->info("Task complete. Request key: ". $this->workload->key);
 
 		return true;
