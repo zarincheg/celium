@@ -1,5 +1,5 @@
 <?php
-namespace Services\PipelineRootNode;
+namespace Services\BaseNode;
 use Communication\Pipeline;
 
 /**
@@ -9,7 +9,7 @@ use Communication\Pipeline;
  * Time: 2:33 PM
  * To change this template use File | Settings | File Templates.
  */
-class Client extends \Services\Client {
+class Manager extends \Services\Manager {
 	/**
 	 * @var \Communication\Pipeline
 	 */
@@ -24,7 +24,7 @@ class Client extends \Services\Client {
 		$request = $this->node->request();
 
 		if(!$request) {
-			$this->logger->warn('Request was not received or is empty: '.(string) $request['body']);
+			$this->logger->debug('Waiting for requests');
 			return true;
 		}
 
@@ -38,6 +38,7 @@ class Client extends \Services\Client {
 			return true;
 		}
 
+		// @todo Переименовать в workload
 		$request['key'] = $requestKey;
 		$request = json_encode($request);
 

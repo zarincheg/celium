@@ -1,7 +1,7 @@
 <configuration xmlns="http://logging.apache.org/log4php/">
 	<appender name="consoleAppender" class="LoggerAppenderConsole" />
 	<root>
-		<level value="info" />
+		<level value="debug" />
 		<appender_ref ref="consoleAppender" />
 	</root>
 </configuration>

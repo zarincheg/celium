@@ -34,9 +34,17 @@ class Pipeline implements CeliumNode, CeliumClient {
 	 */
 	private $indexCollection;
 	/**
+	 * @var \MongoCollection
+	 */
+	private $commandsCollection;
+	/**
 	 * @var \Rabbit
 	 */
 	private $rabbit;
+	/**
+	 * @var \Mongo
+	 */
+	private $mongo;
 
 	/**
 	 * @param string $name
@@ -52,6 +60,7 @@ class Pipeline implements CeliumNode, CeliumClient {
 		$this->mongo = new \Mongo(\Configure::$get->database->mongodb);
 		$this->dataCollection = $this->mongo->nodes->selectCollection($name.'_storage');
 		$this->indexCollection = $this->mongo->nodes->selectCollection($name.'_index');
+		$this->commandsCollection = $this->mongo->nodes->selectCollection($name.'_commands');
 
 		if($parentName) {
 			$this->parentName = $parentName;
@@ -104,7 +113,7 @@ class Pipeline implements CeliumNode, CeliumClient {
 
 	/**
 	 * Returning request from service client. For run any actions.
-	 * @return object|bool
+	 * @return array|bool
 	 */
 	public function request()
 	{
@@ -123,9 +132,9 @@ class Pipeline implements CeliumNode, CeliumClient {
 			throw new \Exception('Precede node not connected!');
 
 		$requestKey = md5($request);
-
-		$request = json_encode(['key' => $requestKey,
-								'body' => $request]);
+		$request = json_decode($request, true);
+		$request['key'] = $requestKey;
+		$request = json_encode($request);
 
 		$b = $this->rabbit->write($request, $this->parentName.'_request');
 
@@ -206,5 +215,28 @@ class Pipeline implements CeliumNode, CeliumClient {
 	public function checkIndex($key)
 	{
 		return $this->indexCollection->findOne(['request_key' => $key]);
+	}
+
+	/**
+	 * @param $key
+	 * @param array $commands
+	 * @return bool
+	 */
+	public function saveRequestCommands($key, array $commands) {
+		$status = $this->commandsCollection->insert(['request_key' => $key, 'request_commands' => $commands]);
+
+		if($status['ok'] !== 1)
+			return false;
+
+		return true;
+	}
+
+	/**
+	 * @param string $key
+	 * @return array List of commands
+	 */
+	public function getRequestCommands($key) {
+		$result = $this->commandsCollection->findOne(['request_key' => $key]);
+		return $result['request_commands'];
 	}
 }

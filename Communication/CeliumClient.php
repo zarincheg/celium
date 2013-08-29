@@ -23,7 +23,7 @@ interface CeliumClient {
 	/**
 	 * Get notification about requested action complete. Returning request/data key for identify needed results.
 	 * (which will used in getData() method)
-	 * @return string|bool
+	 * @return mixed|bool
 	 */
 	public function getNotify();
 }

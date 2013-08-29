@@ -4,8 +4,7 @@ namespace Services;
  * Description of Worker
  * 
  * @author Kirill Zorin <zarincheg@gmail.com>
- * @copyright Copyright (c) 2011, SeoStopol
- * 
+ *
  */
 class Worker extends \GearmanWorker {
 	private $function;
@@ -16,7 +15,6 @@ class Worker extends \GearmanWorker {
 	public function __construct($function) {
 		$this->function = $function;
 		$this->logger = \Logger::getRootLogger();
-		$this->id = rand(100, 99999);
 		parent::__construct();
 	}
 
@@ -32,7 +30,7 @@ class Worker extends \GearmanWorker {
 		
 		$this->addFunction($this->function, array($this, 'process'));
 		
-		$this->logger->info('Gearman worker starting. Server: '.$server.'. Bind function: '.$this->function);
+		$this->logger->info('Node worker starting. Server: '.$server.'. Binding: '.$this->function);
 
 		while($this->work()) {
 			// @todo Error handler
@@ -47,7 +45,7 @@ class Worker extends \GearmanWorker {
 		 */
 		$this->workload = json_decode($job->workload(), true);
 		$this->logger->debug('Workload: ' . $job->workload());
-		$this->logger->info('Task accepted. ID: ' . $this->id);
+		$this->logger->info('Task accepted');
 
 		if (!$this->workload) {
 			$this->logger->warn('Workload is empty');

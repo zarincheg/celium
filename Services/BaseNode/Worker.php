@@ -1,5 +1,5 @@
 <?php
-namespace Services\PipelineNode;
+namespace Services\BaseNode;
 use Communication\Pipeline;
 
 /**
@@ -25,12 +25,17 @@ class Worker extends \Services\Worker {
 		if(!parent::process($job))
 			return true;
 
-		foreach($this->workload->commands as $command) {
-			$name = $command['name'];
+		if(!isset($this->workload['commands']) || !is_array($this->workload['commands'])) {
+			$this->logger->warn('Nothing to do, commands list is empty. Request key: '.$this->workload['key']);
+			return true;
+		}
+
+		foreach($this->workload['commands'] as $c) {
+			$name = $c['name'];
 			$this->logger->info('Prepare command: '.$name);
 
 			$command = \CommandRegistry::get($name);
-			$this->results[$name] = $command->execute($command['params']);
+			$this->results[$name] = $command->execute($c['params']);
 		}
 
 		try {
@@ -39,12 +44,9 @@ class Worker extends \Services\Worker {
 			$this->logger->fatal('Failed to save the results of data processing. Worker: '.__CLASS__);
 		}
 
-		/**
-		 * @note Здесь data_key используется для совместимости с PipelineNode.
-		 */
-		$notify = ['request_key' => $this->workload->key, 'data_key' => $this->workload->key];
+		$notify = ['request_key' => $this->workload['key'], 'data_key' => $this->workload['key']];
 		$this->node->notify(json_encode($notify));
-		$this->logger->info("Task complete. Request key: ". $this->workload->key);
+		$this->logger->info("Task complete. Request key: ". $this->workload['key']);
 
 		return true;
 	}
@@ -53,6 +55,6 @@ class Worker extends \Services\Worker {
 	 * Method for handle data saving logic. Can be redefined in child classes.
 	 */
 	protected function saveResults() {
-		$this->node->saveData($this->workload->key, ['data' => $this->results]);
+		$this->node->saveData($this->workload['key'], ['data' => $this->results]);
 	}
 }

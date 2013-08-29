@@ -6,7 +6,7 @@
 namespace Services;
 
 
-class MongoClient extends Client {
+class MongoClient extends Manager {
 	protected $db = null;
 
 	public function __construct($function) {

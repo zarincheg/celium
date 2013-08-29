@@ -1,13 +1,11 @@
 <?php
 namespace Services;
 /**
- * Клиент fetch-сервиса. Получает URL'ы из очереди, создает задачи на получения содержимого страниц и помещает результат в кеш
- * 
+ *
  * @author Kirill Zorin aka Zarin <zarincheg@gmail.com>
- * @copyright Copyright (c) 2011, Kirill Zorin, SeoStopol
- * 
+ *
  */
-class Client extends \GearmanClient {
+class Manager extends \GearmanClient {
 	protected $function;
 	protected $logger;
 
@@ -35,7 +33,7 @@ class Client extends \GearmanClient {
 
 		$this->setCompleteCallback(array($this, 'complete'));
 
-		$this->logger->info('Gearman client starting. Server: '.$server.'. Bind function: '.$this->function);
+		$this->logger->info('Node manager starting. Server: '.$server.'. Binding: '.$this->function);
 
 		while(true) {
 			if(!$this->process())

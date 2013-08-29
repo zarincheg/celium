@@ -52,7 +52,9 @@ class CommandRegistry {
 		'fetch' => ['ns' => '\Fetch',
 					'commands' => ['web' => 'Web',
 					 			   'miralab' => 'Miralab',
-					   			   'prcy' => 'Prcy']]
+					   			   'prcy' => 'Prcy']],
+		'test' => ['path' => '\Test'],
+		'pipe_test' => ['path' => '\TestPipe']
 	];
 
 	static public function get($command, $params = []) {
