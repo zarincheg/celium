@@ -2,13 +2,14 @@
 spl_autoload_register('celiumAutoload');
 
 function celiumAutoload($class) {
+	echo "(Celium) Try to load: ".$class."\n";
 	$class = str_replace('\\', '/', $class);
 	$rootPath = dirname(__FILE__);
 
-	$rootNS = substr($class, 0, 6);
+	$rootNS = substr($class, 0, 7);
 	$class =  substr($class, 7);
 
-	if($rootNS !== "Celium")
+	if($rootNS !== "Celium/")
 		return false;
 
 	$file = $rootPath.'/'.$class.'.php';
