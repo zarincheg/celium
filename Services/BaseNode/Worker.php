@@ -36,6 +36,8 @@ class Worker extends \Celium\Services\Worker {
 			$this->logger->info('Prepare command: '.$name);
 
 			$command = CommandRegistry::get($name);
+
+			$c['params'] = isset($c['params']) ? $c['params'] : null;
 			$this->results[$name] = $command->execute($c['params']);
 		}
 
