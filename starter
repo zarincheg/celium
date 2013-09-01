@@ -1,0 +1,28 @@
+#!/usr/bin/php
+<?php
+/**
+ * Example: php starter NodeName worker
+ * Example: php starter NodeName manager
+ * Example for pipeline: php starter NodeName manager ParentNodeName
+ * @todo Во многих случаях достаточно писать просто свои "стартеры" для узлов. Надо какую-то штуку под это дело сделать
+ */
+require_once(__DIR__ . '/autoload.php');
+
+/** @var $argc array */
+if($argc < 3) {
+	echo "Script for run the Celium nodes\n\n";
+	exit(0);
+}
+
+$name = $argv[1];
+$component = $argv[2];
+$class = 'Celium\Services\\'.ucfirst($name).'\\'.ucfirst($component);
+
+if(isset($argv[3])) {
+	$parentName = $argv[3];
+	$o = new $class($name, $parentName);
+} else {
+	/** @var $o Celium\Services\Worker | Celium\Services\Manager */
+	$o = new $class($name);
+}
+$o->start('127.0.0.1:4730', 1000*30);
