@@ -39,7 +39,7 @@ class Manager extends \GearmanClient {
 			if(!$this->process())
 				break;
 
-			sleep($delay);
+			usleep($delay);
 		}
 
 		return true;
