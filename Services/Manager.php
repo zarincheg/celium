@@ -1,5 +1,5 @@
 <?php
-namespace Services;
+namespace Celium\Services;
 /**
  *
  * @author Kirill Zorin aka Zarin <zarincheg@gmail.com>

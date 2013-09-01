@@ -1,22 +1,26 @@
 <?php
-spl_autoload_register('celium_autoload');
+spl_autoload_register('celiumAutoload');
 
-function celium_autoload($class) {
-	$path = str_replace('\\', '/', $class).'.php';
-	$dirname = dirname(__FILE__).'/';
+function celiumAutoload($class) {
+	$class = str_replace('\\', '/', $class);
+	$rootPath = dirname(__FILE__);
 
-	//@todo Чтото сделать с этим бредом
-	if(preg_match('!^Logger.*?!', $path)) {
-		return true;
-	}
+	$rootNS = substr($class, 0, 6);
+	$class =  substr($class, 7);
 
-	if(file_exists($dirname.$path))
-		require_once $dirname.$path;
+	if($rootNS !== "Celium")
+		return false;
+
+	$file = $rootPath.'/'.$class.'.php';
+
+	if(file_exists($file))
+		require_once $file;
 	else
-		throw new Exception("Required class not found: ".$class."\nWith class file path: ".$dirname.$path);
+		throw new Exception("Required class not found: ".$class." With class file path: ".$file);
+
 }
 
-\Configure::init(dirname(__FILE__) . '/config');
+\Celium\Configure::init(dirname(__FILE__) . '/config');
 
-require_once(\Configure::$get->path->root.'/Logging/src/main/php/Logger.php');
-Logger::configure(\Configure::$get->path->root.'/logger.xml');
+require_once(\Celium\Configure::$get->path->root.'/Logging/src/main/php/Logger.php');
+Logger::configure(\Celium\Configure::$get->path->root.'/logger.xml');

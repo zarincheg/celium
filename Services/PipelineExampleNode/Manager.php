@@ -4,10 +4,10 @@
  * @author Kirill Zorin <zarincheg@gmail.com>
  */
 
-namespace Services\PipelineExampleNode;
+namespace Celium\Services\PipelineExampleNode;
 
 
-class Manager extends \Services\PipelineNode\Manager {
+class Manager extends \Celium\Services\PipelineNode\Manager {
 	protected function prepareRequest(array $request) {
 		$command = ['name' => 'test',
 					'params' => ['text' => 'Hello! I am just a simple test command =)']];

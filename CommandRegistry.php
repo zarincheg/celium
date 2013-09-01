@@ -1,10 +1,11 @@
 <?php
+namespace Celium;
 /**
  * Реестр комманд и алиасов к ним
  * @todo Перенести описание в конфиг-файл
  */
 class CommandRegistry {
-	static private $root = '\Commands';
+	static private $root = '\Celium\Commands';
 	static private $list = [
 		'google' => ['ns' => '\Parser\Google',
 					 'commands' => ['getrelated' => 'GetRelated',

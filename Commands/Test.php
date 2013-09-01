@@ -1,11 +1,13 @@
 <?php
-namespace Commands;
+namespace Celium\Commands;
+use Celium\Command;
+
 /**
  * Description of class
  * @author Kirill Zorin <zarincheg@gmail.com>
  */
 
-class Test extends \Command {
+class Test extends Command {
 
 	public function execute($input = null)
 	{

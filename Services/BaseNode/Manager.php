@@ -1,6 +1,6 @@
 <?php
-namespace Services\BaseNode;
-use Communication\Pipeline;
+namespace Celium\Services\BaseNode;
+use \Celium\Communication\Pipeline;
 
 /**
  * Created by JetBrains PhpStorm.
@@ -9,9 +9,9 @@ use Communication\Pipeline;
  * Time: 2:33 PM
  * To change this template use File | Settings | File Templates.
  */
-class Manager extends \Services\Manager {
+class Manager extends \Celium\Services\Manager {
 	/**
-	 * @var \Communication\Pipeline
+	 * @var \Celium\Communication\Pipeline
 	 */
 	private $node;
 

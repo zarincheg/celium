@@ -1,5 +1,5 @@
 <?php
-namespace Communication;
+namespace Celium\Communication;
 /**
  * Describes interface for communication between Celium Clients and Celium Nodes
  * interface CeliumClient.

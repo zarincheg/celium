@@ -1,14 +1,15 @@
 <?php
-namespace Services\BaseNode;
-use Communication\Pipeline;
+namespace Celium\Services\BaseNode;
+use Celium\CommandRegistry;
+use \Celium\Communication\Pipeline;
 
 /**
  * @author Kirill Zorin aka Zarin <zarincheg@gmail.com>
  *
  */
-class Worker extends \Services\Worker {
+class Worker extends \Celium\Services\Worker {
 	/**
-	 * @var \Communication\Pipeline
+	 * @var \Celium\Communication\Pipeline
 	 */
 	protected $node;
 	/**
@@ -34,7 +35,7 @@ class Worker extends \Services\Worker {
 			$name = $c['name'];
 			$this->logger->info('Prepare command: '.$name);
 
-			$command = \CommandRegistry::get($name);
+			$command = CommandRegistry::get($name);
 			$this->results[$name] = $command->execute($c['params']);
 		}
 

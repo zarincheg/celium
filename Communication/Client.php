@@ -4,12 +4,15 @@
  * @author Kirill Zorin <zarincheg@gmail.com>
  */
 
-namespace Communication;
+namespace Celium\Communication;
+
+use Celium\Configure;
+use Celium\Rabbit;
 
 class Client implements CeliumClient {
 
 	/**
-	 * @var \Rabbit
+	 * @var Rabbit
 	 */
 	private $rabbit;
 	/**
@@ -36,11 +39,11 @@ class Client implements CeliumClient {
 	function __construct($name) {
 		$this->name = $name;
 
-		$this->rabbit = new \Rabbit();
+		$this->rabbit = new Rabbit();
 		$this->requestQueue = $this->rabbit->init($this->name.'_request', 'r');
 		$this->notifyQueue = $this->rabbit->init($this->name.'_notify', 'r');
 
-		$this->mongo = new \Mongo(\Configure::$get->database->mongodb);
+		$this->mongo = new \Mongo(Configure::$get->database->mongodb);
 		$this->dataCollection = $this->mongo->nodes->selectCollection($name.'_storage');
 	}
 
@@ -86,7 +89,7 @@ class Client implements CeliumClient {
 	 */
 	public function getNotify()
 	{
-		$message = \Rabbit::read($this->notifyQueue);
+		$message = Rabbit::read($this->notifyQueue);
 
 		if(!$message)
 			return false;

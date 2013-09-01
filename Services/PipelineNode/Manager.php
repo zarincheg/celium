@@ -4,14 +4,14 @@
  * @author Kirill Zorin <zarincheg@gmail.com>
  */
 
-namespace Services\PipelineNode;
+namespace Celium\Services\PipelineNode;
 
-use Communication\Pipeline;
+use \Celium\Communication\Pipeline;
 
-class Manager extends \Services\Manager {
+class Manager extends \Celium\Services\Manager {
 
 	/**
-	 * @var \Communication\Pipeline
+	 * @var \Celium\Communication\Pipeline
 	 */
 	protected $node;
 

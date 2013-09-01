@@ -1,5 +1,5 @@
 <?php
-namespace Communication;
+namespace Celium\Communication;
 /**
  * Describes interface for Celium Nodes communication
  * Interface ServiceNode.

@@ -1,4 +1,5 @@
 <?php
+namespace Celium;
 /**
  * Class for working with RabbitMQ queues
  *

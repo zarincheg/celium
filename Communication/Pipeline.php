@@ -1,5 +1,8 @@
 <?php
-namespace Communication;
+namespace Celium\Communication;
+use Celium\Configure;
+use Celium\Rabbit;
+
 /**
  * @author Kirill Zorin <zarincheg@gmail.com>
  */
@@ -53,11 +56,11 @@ class Pipeline implements CeliumNode, CeliumClient {
 	function __construct($name, $parentName = false) {
 		$this->name = $name;
 
-		$this->rabbit = new \Rabbit();
+		$this->rabbit = new Rabbit();
 		$this->notifyQueue = $this->rabbit->init($this->name.'_notify');
 		$this->requestQueue = $this->rabbit->init($this->name.'_request', 'r');
 
-		$this->mongo = new \Mongo(\Configure::$get->database->mongodb);
+		$this->mongo = new \Mongo(Configure::$get->database->mongodb);
 		$this->dataCollection = $this->mongo->nodes->selectCollection($name.'_storage');
 		$this->indexCollection = $this->mongo->nodes->selectCollection($name.'_index');
 		$this->commandsCollection = $this->mongo->nodes->selectCollection($name.'_commands');
@@ -103,7 +106,7 @@ class Pipeline implements CeliumNode, CeliumClient {
 			throw new \Exception('Precede node not connected!');
 
 		$queue = $this->parentNode['notifyQueue'];
-		$message = \Rabbit::read($queue);
+		$message = Rabbit::read($queue);
 
 		if(!$message)
 			return false;
@@ -117,7 +120,7 @@ class Pipeline implements CeliumNode, CeliumClient {
 	 */
 	public function request()
 	{
-		return json_decode(\Rabbit::read($this->requestQueue), true);
+		return json_decode(Rabbit::read($this->requestQueue), true);
 	}
 
 	/**
