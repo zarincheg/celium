@@ -2,7 +2,7 @@
 spl_autoload_register('celiumAutoload');
 
 function celiumAutoload($class) {
-	echo "(Celium) Try to load: ".$class."\n";
+	//echo "(Celium) Try to load: ".$class."\n";
 	$class = str_replace('\\', '/', $class);
 	$rootPath = dirname(__FILE__);
 

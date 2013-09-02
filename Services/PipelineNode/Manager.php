@@ -40,6 +40,9 @@ class Manager extends \Celium\Services\Manager {
 
 		// @todo Возможно ли возникновение разных запросов к родительскому узлу при одинаковых запросах клиентских узлов?!
 		if(!$this->node->checkIndex($childRequestKey)) {
+			/**
+			 * @todo Может быть необходимо выполнить несколько запросов для обработки клиентского запроса, добавить эту возможность
+			 */
 			$requestKey = $this->prepareRequest($request);
 
 			if(!is_string($requestKey) || empty($requestKey)) {

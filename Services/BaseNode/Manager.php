@@ -4,7 +4,7 @@ use \Celium\Communication\Pipeline;
 
 /**
  * @author Kirill Zorin aka Zarin <zarincheg@gmail.com>
- * @todo Перевести коммуникацию на другую реализацию CeliumNode, базовую, а не pipeline
+ * @todo Перевести коммуникацию на другую реализацию \Communication\Node, базовую, а не pipeline
  */
 class Manager extends \Celium\Services\Manager {
 	/**
@@ -35,13 +35,12 @@ class Manager extends \Celium\Services\Manager {
 			return true;
 		}
 
-		// @todo Переименовать в workload
 		$request['key'] = $requestKey;
-		$request = json_encode($request);
+		$workload = json_encode($request);
 
 		if(!$this->node->checkIndex($requestKey)) {
 			$this->node->addToIndex($requestKey);
-			$this->addTaskBackground($this->function, $request);
+			$this->addTaskBackground($this->function, $workload);
 			$this->logger->info('The task was added: '.$requestKey);
 		} else {
 			$this->logger->info('Trying to add duplicate task: '.$requestKey);
