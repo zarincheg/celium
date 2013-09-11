@@ -40,9 +40,6 @@ class Manager extends \Celium\Services\Manager {
 
 		// @todo Возможно ли возникновение разных запросов к родительскому узлу при одинаковых запросах клиентских узлов?!
 		if(!$this->node->checkIndex($childRequestKey)) {
-			/**
-			 * @todo Может быть необходимо выполнить несколько запросов для обработки клиентского запроса, добавить эту возможность
-			 */
 			$requestKey = $this->prepareRequest($request);
 
 			if(!is_string($requestKey) || empty($requestKey)) {
@@ -96,8 +93,8 @@ class Manager extends \Celium\Services\Manager {
 	/**
 	 * Method for prepare request to parent node or doing another actions. Can be redefined in child classes,
 	 * but must return string with unique key of request. By default return the result of \Pipeline::sendRequest() call, and it is good practice.
-	 * В этом методе определяется какие команды запрашивать у родительского узла. По умолчанию просто дублируется запрос от клиента.
-	 * @param array $request
+	 * In this method defines which commands will requested for parent node. By default client request just resend.
+	 * @param array $request Client request
 	 * @return string
 	 */
 	protected function prepareRequest(array $request) {
