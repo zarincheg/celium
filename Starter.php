@@ -11,12 +11,21 @@ class Starter {
 	private static $managers = [];
 	private static $workers = [];
 
-	// starter.php --node facebook_collector --worker
-	public static function onStartWorker($nodeName, callable $function) {
+	/**
+	 * Add worker for start it
+	 * @param string $nodeName
+	 * @param callable $function Function that must return the object of \Celium\Services\Worker class for start it. Can get two parameters: node name and cli args by second argument.
+	 */
+	public static function addWorker($nodeName, callable $function) {
 		self::$workers[$nodeName] = $function;
 	}
 
-	public static function onStartManager($nodeName, callable $function) {
+	/**
+	 * Add manager for start it
+	 * @param string $nodeName
+	 * @param callable $function Function that must return the object of \Celium\Services\Manager class for start it. Can get two parameters: node name and cli args by second argument.
+	 */
+	public static function addManager($nodeName, callable $function) {
 		self::$managers[$nodeName] = $function;
 	}
 
@@ -41,7 +50,7 @@ class Starter {
 				throw new \Exception('Workers for '.$params['node'].' not found');
 
 			$function = self::$workers[$params['node']];
-			$worker = $function();
+			$worker = $function($params['node'], $params);
 
 			if(!($worker instanceof \Celium\Services\Worker))
 				throw new \Exception('onStartManager function must return the object of \Celium\Services\Worker');
@@ -54,7 +63,7 @@ class Starter {
 				throw new \Exception('Managers for '.$params['node'].' not found');
 
 			$function = self::$managers[$params['node']];
-			$manager = $function();
+			$manager = $function($params['node'], $params);
 
 			if(!($manager instanceof \Celium\Services\Manager))
 				throw new \Exception('onStartManager function must return the object of \Celium\Services\Manager');
