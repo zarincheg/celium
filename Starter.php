@@ -68,7 +68,7 @@ class Starter {
 			if(!($manager instanceof \Celium\Services\Manager))
 				throw new \Exception('onStartManager function must return the object of \Celium\Services\Manager');
 
-			$manager->start();
+			$manager->start('127.0.0.1:4730', 1000*1000); // @todo Make it configurable
 		} else {
 			throw new \Exception("Nothing to start. Use --worker or --manager options.\n");
 		}

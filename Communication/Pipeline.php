@@ -242,4 +242,8 @@ class Pipeline implements CeliumNode, CeliumClient {
 		$result = $this->commandsCollection->findOne(['request_key' => $key]);
 		return $result['request_commands'];
 	}
+
+	public function getName() {
+		return $this->name;
+	}
 }

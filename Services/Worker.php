@@ -11,10 +11,12 @@ class Worker extends \GearmanWorker {
 	protected $logger;
 	protected $id;
 	protected $workload;
+	protected $mongo;
 
 	public function __construct($function) {
 		$this->function = $function;
 		$this->logger = \Logger::getRootLogger();
+		$this->mongo = new \MongoClient(\Celium\Configure::$get->database->mongodb);
 		parent::__construct();
 	}
 
@@ -44,8 +46,14 @@ class Worker extends \GearmanWorker {
 		 * @todo Schema validation
 		 */
 		$this->workload = json_decode($job->workload(), true);
-		$this->logger->debug('Workload: ' . $job->workload());
 		$this->logger->info('Task accepted');
+
+		$this->mongo->celium_stats->workers->insert([
+			'worker' => $this->function,
+			'workload' => $this->workload,
+			'status' => 'accept',
+			'time' => time()
+		]);
 
 		if (!$this->workload) {
 			$this->logger->warn('Workload is empty');

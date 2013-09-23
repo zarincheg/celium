@@ -12,8 +12,11 @@ class Manager extends \Celium\Services\Manager {
 	 */
 	private $node;
 
+	protected $mongo;
+
 	public function __construct($name) {
 		$this->node = new Pipeline($name);
+		$this->mongo = new \MongoClient(\Celium\Configure::$get->database->mongodb);
 		parent::__construct($name);
 	}
 
@@ -21,7 +24,6 @@ class Manager extends \Celium\Services\Manager {
 		$request = $this->node->request();
 
 		if(!$request) {
-			$this->logger->debug('Waiting for requests');
 			return true;
 		}
 
@@ -32,6 +34,7 @@ class Manager extends \Celium\Services\Manager {
 		if($data) {
 			$this->node->notify($requestKey);
 			$this->logger->info('Result data found, notification sent: '.$requestKey);
+
 			return true;
 		}
 

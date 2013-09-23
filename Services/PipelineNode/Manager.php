@@ -14,20 +14,30 @@ class Manager extends \Celium\Services\Manager {
 	 * @var \Celium\Communication\Pipeline
 	 */
 	protected $node;
+	protected $mongo;
 
 	public function __construct($name, $parentName) {
 		$this->node = new Pipeline($name, $parentName);
+		$this->mongo = new \MongoClient(\Celium\Configure::$get->database->mongodb);
 		parent::__construct($name);
 	}
 
 	public function process() {
 		$request = $this->node->request();
 
-		if(!$request) {
-			$this->logger->debug('Waiting for requests');
-			return true;
-		}
+		if($request)
+			$this->handleRequest($request);
 
+		// Получаем уведомления от родительского узла
+		$notify = $this->node->getNotify(); // data_key & request_key
+
+		if($notify)
+			$this->handleNotify($notify);
+
+		return parent::process();
+	}
+
+	protected function handleRequest(array $request) {
 		$childRequestKey = $request['key'];
 		// Check the result data in the storage
 		$data = $this->node->checkData($childRequestKey);
@@ -35,6 +45,7 @@ class Manager extends \Celium\Services\Manager {
 		if($data) {
 			$this->node->notify($childRequestKey);
 			$this->logger->info('Result data found, notification sent: '.$childRequestKey);
+
 			return true;
 		}
 
@@ -56,38 +67,33 @@ class Manager extends \Celium\Services\Manager {
 		} else {
 			$this->logger->info('Trying to add duplicate task: '.$childRequestKey);
 		}
+	}
 
-		// Получаем уведомления от родительского узла
-		$notify = $this->node->getNotify(); // data_key & request_key
+	protected function handleNotify($notify) {
+		$this->logger->info('Response from parent node received. Key: '.$notify['data_key']);
+		// @todo Может быть и данные в воркерах получать?
+		$parentData = $this->node->getData($notify['data_key']); // data_key
 
-		if($notify) {
-			$this->logger->info('Response from parent node received. Key: '.$notify['data_key']);
-			// @todo Может быть и данные в воркерах получать?
-			$parentData = $this->node->getData($notify['data_key']); // data_key
+		if(!$parentData) {
+			$this->logger->warn('In the parent node data not found. Key: '.$notify['data_key']);
+		} else {
+			// request_key по нему выкупаем ключи запросов клиентов из индекса. И потом он ухдит как dataKey
+			// Это нужно потому что мы выполняем запрос по обработке данных из родительского узла. Но отвечать нам нужно на запрос из дочернего.
+			// Поэтому нужно связать результаты с запросом к настоящему узлу дополнительно.
+			//$parentData['key'] = $notify['request_key'];
 
-			if(!$parentData) {
-				$this->logger->warn('In the parent node data not found. Key: '.$notify['data_key']);
-			} else {
-				// request_key по нему выкупаем ключи запросов клиентов из индекса. И потом он ухдит как dataKey
-				// Это нужно потому что мы выполняем запрос по обработке данных из родительского узла. Но отвечать нам нужно на запрос из дочернего.
-				// Поэтому нужно связать результаты с запросом к настоящему узлу дополнительно.
-				//$parentData['key'] = $notify['request_key'];
+			$index = $this->node->getIndexByParent($notify['request_key']);
 
-				$index = $this->node->getIndexByParent($notify['request_key']);
-
-				// Processing the client request directly
-				while($index->hasNext()) {
-					$keys = $index->getNext();
-					$commands = $this->node->getRequestCommands($keys['request_key']); // request_key == client(child)_request_key
-					$workload = ['key' => $keys['request_key'],
-								 'commands' => $commands,
-								 'parent_node_result' => $parentData]; // @todo Добавить описание схемы для ворклоада пайплайнов
-					$this->addTaskBackground($this->function, json_encode($workload));
-				}
+			// Processing the client request directly
+			while($index->hasNext()) {
+				$keys = $index->getNext();
+				$commands = $this->node->getRequestCommands($keys['request_key']); // request_key == client(child)_request_key
+				$workload = ['key' => $keys['request_key'],
+					'commands' => $commands,
+					'parent_node_result' => $parentData]; // @todo Добавить описание схемы для ворклоада пайплайнов
+				$this->addTaskBackground($this->function, json_encode($workload));
 			}
 		}
-
-		return parent::process();
 	}
 
 	/**

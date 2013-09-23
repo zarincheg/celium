@@ -38,7 +38,7 @@ class Worker extends \Celium\Services\Worker {
 			$command = CommandRegistry::get($name);
 
 			$c['params'] = isset($c['params']) ? $c['params'] : null;
-			$this->results[$name] = $command->execute($c['params']);
+			$this->results[$name] = $command->execute($c['params'], $this->workload);
 		}
 
 		try {

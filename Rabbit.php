@@ -25,8 +25,10 @@ class Rabbit {
 
 		$this->channel = new \AMQPChannel($connection);
 		$this->exchange = new \AMQPExchange($this->channel);
+		//$this->exchange->delete('Celium');
 		$this->exchange->setName('Celium');
 		$this->exchange->setType('direct');
+		//$this->exchange->setFlags(\AMQP_DURABLE);
 		$this->exchange->declare();
 	}
 
@@ -57,15 +59,19 @@ class Rabbit {
 	}
 
 	/**
-	 * @param AMQPQueue $queue
+	 * @param \AMQPQueue $queue
 	 * @return bool|string
 	 */
 	public static function read(\AMQPQueue $queue) {
 		usleep(10000);
-		$envelope = $queue->get(AMQP_AUTOACK);
 
-		if($envelope)
-			return $envelope->getBody();
+		$envelope = $queue->get(\AMQP_NOPARAM);
+
+		if($envelope) {
+			$message = $envelope->getBody();
+			$queue->ack($envelope->getDeliveryTag());
+			return $message;
+		}
 
 		return false;
 	}
