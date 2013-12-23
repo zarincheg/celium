@@ -32,7 +32,7 @@ class Manager extends \Celium\Services\Manager {
 		$data = $this->node->checkData($requestKey);
 
 		if($data) {
-			$this->node->notify($requestKey);
+			$this->node->notify(json_encode(['data_key' => $requestKey, 'request_key' => $requestKey]));
 			$this->logger->info('Result data found, notification sent: '.$requestKey);
 
 			return true;

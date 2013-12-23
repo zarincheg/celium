@@ -181,7 +181,7 @@ class Pipeline implements CeliumNode, CeliumClient {
 	 */
 	public function checkData($key)
 	{
-		return $this->dataCollection->findOne(['request_key' => $key]);
+		return $this->dataCollection->findOne(['key' => $key]);
 	}
 
 	/**
@@ -208,7 +208,17 @@ class Pipeline implements CeliumNode, CeliumClient {
 	 * @return \MongoCursor
 	 */
 	public function getIndexByParent($parentRequestKey) {
-		return $this->indexCollection->find(['parent_request_key' => $parentRequestKey]);
+		$bindList = [];
+		$index = $this->indexCollection->find(['parent_request_key' => $parentRequestKey, 'expired' => ['$exists' => 0]]);
+		$index->snapshot();
+
+		while ($index->hasNext()) {
+			$bindList[] = $index->getNext();
+		}
+
+		$this->indexCollection->update(['parent_request_key' => $parentRequestKey], ['$set' => ['expired' => true]], ['multiple' => true]); // @todo Тут проблемный момент из-за отсутствия транзакций. Надо эту часть обдумать. Просто могут лишние индексы удалиться.
+
+		return $bindList;
 	}
 
 	/**
