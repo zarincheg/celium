@@ -48,12 +48,12 @@ class Worker extends \GearmanWorker {
 		$this->workload = json_decode($job->workload(), true);
 		$this->logger->info('Task accepted');
 
-		$this->mongo->celium_stats->workers->insert([
+		/*$this->mongo->celium_stats->workers->insert([
 			'worker' => $this->function,
 			'workload' => $this->workload,
 			'status' => 'accept',
 			'time' => time()
-		]);
+		]);*/
 
 		if (!$this->workload) {
 			$this->logger->warn('Workload is empty');

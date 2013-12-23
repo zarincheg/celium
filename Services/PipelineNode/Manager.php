@@ -43,7 +43,7 @@ class Manager extends \Celium\Services\Manager {
 		$data = $this->node->checkData($childRequestKey);
 
 		if($data) {
-			$this->node->notify($childRequestKey);
+			$this->node->notify(json_encode(['data_key' => $childRequestKey, 'request_key' => $childRequestKey]));
 			$this->logger->info('Result data found, notification sent: '.$childRequestKey);
 
 			return true;
@@ -85,8 +85,7 @@ class Manager extends \Celium\Services\Manager {
 			$index = $this->node->getIndexByParent($notify['request_key']);
 
 			// Processing the client request directly
-			while($index->hasNext()) {
-				$keys = $index->getNext();
+			foreach ($index as $keys) {
 				$commands = $this->node->getRequestCommands($keys['request_key']); // request_key == client(child)_request_key
 				$workload = ['key' => $keys['request_key'],
 					'commands' => $commands,
