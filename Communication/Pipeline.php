@@ -94,6 +94,12 @@ class Pipeline implements CeliumNode, CeliumClient {
 		return $collection->findOne(['key' => $key], ['_id' => false]);
 	}
 
+	public function removeData($key) {
+		/** @var $collection \MongoCollection */
+		$collection = $this->parentNode['dataCollection'];
+		return $collection->remove(['key' => $key]);
+	}
+
 	/**
 	 * Get notification about requested action complete. Returning request/data key for identify needed results.
 	 * (which will used in getData() method)
