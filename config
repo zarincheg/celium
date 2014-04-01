@@ -1,8 +1,0 @@
-{
-	"path": {
-		"root": "/home/zarin/projects/celium"
-	},
-	"database": {
-		"mongodb": "mongodb://127.0.0.1:27017"
-	}
-}
