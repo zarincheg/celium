@@ -12,5 +12,8 @@
 			"email": "zarincheg@gmail.com",
 			"role": "Developer"
 		}
-	]
+	],
+	"autoload": {
+		"classmap": ["./"]
+	}
 }
