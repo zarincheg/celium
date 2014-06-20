@@ -4,5 +4,9 @@
 	},
 	"database": {
 		"mongodb": "mongodb://127.0.0.1:27017"
+	},
+	"logging": {
+		"file": "/var/log/celium.log",
+		"mongodb": { "database": "celium", "collection": "logs" }
 	}
 }

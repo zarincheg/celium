@@ -3,7 +3,7 @@ namespace Celium;
 /**
  *
  */
-class Configure {
+class Config {
 
 	/**
 	 * @var string Config data array

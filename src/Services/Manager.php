@@ -1,17 +1,27 @@
 <?php
 namespace Celium\Services;
 /**
- *
+ * Base Manager for using in Celium application
  * @author Kirill Zorin aka Zarin <zarincheg@gmail.com>
  *
  */
+
+use Celium\DefaultLogger;
+use Monolog\Logger;
+
 class Manager extends \GearmanClient {
 	protected $function;
 	protected $logger;
 
-	public function __construct($function) {
+	public function __construct($function, Logger $logger = null) {
 		$this->function = $function;
-		$this->logger = \Logger::getRootLogger();
+
+		if (!$logger) {
+			$this->logger = new DefaultLogger('client');
+		} else {
+			$this->logger = $logger;
+		}
+
 		parent::__construct();
 	}
 
@@ -33,7 +43,10 @@ class Manager extends \GearmanClient {
 
 		$this->setCompleteCallback(array($this, 'complete'));
 
-		$this->logger->info('Node manager starting. Server: '.$server.'. Binding: '.$this->function);
+		$this->logger->info('Node manager starting', [
+			'server' => $server,
+			'binding' => $this->function
+		]);
 
 		while(true) {
 			if(!$this->process())

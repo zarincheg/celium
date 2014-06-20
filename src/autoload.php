@@ -1,4 +1,5 @@
 <?php
+include_once __DIR__."/../vendor/autoload.php";
 spl_autoload_register('celiumAutoload');
 
 function celiumAutoload($class) {
@@ -21,7 +22,7 @@ function celiumAutoload($class) {
 
 }
 
-\Celium\Configure::init(dirname(__FILE__) . '/config');
+\Celium\Config::init(dirname(__FILE__) . '/config');
 
-require_once(\Celium\Configure::$get->path->root.'/Logging/src/main/php/Logger.php');
-Logger::configure(\Celium\Configure::$get->path->root.'/logger.xml');
+require_once(\Celium\Config::$get->path->root.'/Logging/src/main/php/Logger.php');
+Logger::configure(\Celium\Config::$get->path->root.'/logger.xml');

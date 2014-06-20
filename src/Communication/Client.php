@@ -6,8 +6,10 @@
 
 namespace Celium\Communication;
 
-use Celium\Configure;
+use Celium\Config;
+use Celium\DefaultLogger;
 use Celium\Rabbit;
+use Monolog\Logger;
 
 class Client implements CeliumClient {
 
@@ -35,6 +37,10 @@ class Client implements CeliumClient {
 	 * @var \Mongo
 	 */
 	private $mongo;
+	/**
+	 * @var \Monolog\Logger
+	 */
+	protected $logger;
 
 	function __construct($name) {
 		$this->name = $name;
@@ -43,8 +49,14 @@ class Client implements CeliumClient {
 		$this->requestQueue = $this->rabbit->init($this->name.'_request', 'r');
 		$this->notifyQueue = $this->rabbit->init($this->name.'_notify', 'r');
 
-		$this->mongo = new \Mongo(Configure::$get->database->mongodb);
+		$this->mongo = new \Mongo(Config::$get->database->mongodb);
 		$this->dataCollection = $this->mongo->nodes->selectCollection($name.'_storage');
+
+		$this->logger = new DefaultLogger('client');
+	}
+
+	public function setLogger(Logger $logger) {
+		$this->logger = $logger;
 	}
 
 	/**
@@ -63,8 +75,21 @@ class Client implements CeliumClient {
 
 		$b = $this->rabbit->write($request, $this->name.'_request');
 
-		if(!$b)
+		if(!$b) {
+			$this->logger->error('Request to the node failed', [
+				'nodeName' => $this->name,
+				'requestBody' => $request,
+				'requestKey' => $requestKey
+			]);
+
 			throw new \Exception("Failed to add the request to the queue");
+		}
+
+		$this->logger->info('Request was sent to the node', [
+			'nodeName' => $this->name,
+			'requestBody' => $request,
+			'requestKey' => $requestKey
+		]);
 
 		return $requestKey;
 	}
@@ -93,6 +118,12 @@ class Client implements CeliumClient {
 
 		if(!$message)
 			return false;
+
+		$this->logger->info('Node notification fetched', [
+			'nodeName' => $this->name,
+			'notifyType' => 'complete',
+			'message' => $message
+		]);
 
 		return json_decode($message, true);
 	}

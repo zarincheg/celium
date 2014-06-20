@@ -6,6 +6,11 @@ namespace Celium\Services;
  * @author Kirill Zorin <zarincheg@gmail.com>
  *
  */
+
+use Celium\Config;
+use Celium\DefaultLogger;
+use Monolog\Logger;
+
 class Worker extends \GearmanWorker {
 	private $function;
 	protected $logger;
@@ -13,10 +18,15 @@ class Worker extends \GearmanWorker {
 	protected $workload;
 	protected $mongo;
 
-	public function __construct($function) {
+	public function __construct($function, Logger $logger = null) {
 		$this->function = $function;
-		$this->logger = \Logger::getRootLogger();
-		$this->mongo = new \MongoClient(\Celium\Configure::$get->database->mongodb);
+		$this->mongo = new \MongoClient(Config::$get->database->mongodb);
+
+		if (!$logger) {
+			$this->logger = new DefaultLogger('client');
+		} else {
+			$this->logger = $logger;
+		}
 		parent::__construct();
 	}
 
@@ -32,7 +42,10 @@ class Worker extends \GearmanWorker {
 		
 		$this->addFunction($this->function, array($this, 'process'));
 		
-		$this->logger->info('Node worker starting. Server: '.$server.'. Binding: '.$this->function);
+		$this->logger->info('Node worker starting', [
+			'server' => $server,
+			'binding' => $this->function
+		]);
 
 		while($this->work()) {
 			// @todo Error handler
@@ -46,17 +59,14 @@ class Worker extends \GearmanWorker {
 		 * @todo Schema validation
 		 */
 		$this->workload = json_decode($job->workload(), true);
-		$this->logger->info('Task accepted');
-
-		/*$this->mongo->celium_stats->workers->insert([
-			'worker' => $this->function,
-			'workload' => $this->workload,
-			'status' => 'accept',
-			'time' => time()
-		]);*/
+		$this->logger->info('Task accepted', [
+			'function' => $this->function
+		]);
 
 		if (!$this->workload) {
-			$this->logger->warn('Workload is empty');
+			$this->logger->warning('Workload is empty', [
+				'function' => $this->function
+			]);
 			return false;
 		}
 		return true;

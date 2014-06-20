@@ -7,6 +7,9 @@
 namespace Celium;
 
 
+use Celium\Services\Manager;
+use Celium\Services\Worker;
+
 class Starter {
 	private static $managers = [];
 	private static $workers = [];
@@ -52,7 +55,7 @@ class Starter {
 			$function = self::$workers[$params['node']];
 			$worker = $function($params['node'], $params);
 
-			if(!($worker instanceof \Celium\Services\Worker))
+			if(!($worker instanceof Worker))
 				throw new \Exception('onStartManager function must return the object of \Celium\Services\Worker');
 
 			$worker->start();
@@ -65,7 +68,7 @@ class Starter {
 			$function = self::$managers[$params['node']];
 			$manager = $function($params['node'], $params);
 
-			if(!($manager instanceof \Celium\Services\Manager))
+			if(!($manager instanceof Manager))
 				throw new \Exception('onStartManager function must return the object of \Celium\Services\Manager');
 
 			$manager->start('127.0.0.1:4730', 1000*1000); // @todo Make it configurable

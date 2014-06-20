@@ -1,7 +1,9 @@
 <?php
 namespace Celium\Communication;
-use Celium\Configure;
+use Celium\Config;
+use Celium\DefaultLogger;
 use Celium\Rabbit;
+use Monolog\Logger;
 
 /**
  * @author Kirill Zorin <zarincheg@gmail.com>
@@ -60,7 +62,7 @@ class Pipeline implements CeliumNode, CeliumClient {
 		$this->notifyQueue = $this->rabbit->init($this->name.'_notify');
 		$this->requestQueue = $this->rabbit->init($this->name.'_request', 'r');
 
-		$this->mongo = new \Mongo(Configure::$get->database->mongodb);
+		$this->mongo = new \Mongo(Config::$get->database->mongodb);
 		$this->dataCollection = $this->mongo->nodes->selectCollection($name.'_storage');
 		$this->indexCollection = $this->mongo->nodes->selectCollection($name.'_index');
 		$this->commandsCollection = $this->mongo->nodes->selectCollection($name.'_commands');
@@ -69,6 +71,12 @@ class Pipeline implements CeliumNode, CeliumClient {
 			$this->parentName = $parentName;
 			$this->initParent($parentName);
 		}
+
+		$this->logger = new DefaultLogger('pipeline');
+	}
+
+	public function setLogger(Logger $logger) {
+		$this->logger = $logger;
 	}
 
 	/**
@@ -89,12 +97,22 @@ class Pipeline implements CeliumNode, CeliumClient {
 	 */
 	public function getData($key)
 	{
+		$this->logger->info('Fetch data from node', [
+			'nodeName' => $this->name,
+			'dataKey' => $key
+		]);
+
 		/** @var $collection \MongoCollection */
 		$collection = $this->parentNode['dataCollection'];
 		return $collection->findOne(['key' => $key], ['_id' => false]);
 	}
 
 	public function removeData($key) {
+		$this->logger->info('Remove data from node', [
+			'nodeName' => $this->name,
+			'dataKey' => $key
+		]);
+
 		/** @var $collection \MongoCollection */
 		$collection = $this->parentNode['dataCollection'];
 		return $collection->remove(['key' => $key]);
@@ -117,6 +135,12 @@ class Pipeline implements CeliumNode, CeliumClient {
 		if(!$message)
 			return false;
 
+		$this->logger->info('Node notification fetched', [
+			'nodeName' => $this->name,
+			'notifyType' => 'complete',
+			'message' => $message
+		]);
+
 		return json_decode($message, true);
 	}
 
@@ -126,6 +150,10 @@ class Pipeline implements CeliumNode, CeliumClient {
 	 */
 	public function request()
 	{
+		$this->logger->info('Receive request from queue', [
+			'nodeName' => $this->name
+		]);
+
 		return json_decode(Rabbit::read($this->requestQueue), true);
 	}
 
@@ -147,8 +175,21 @@ class Pipeline implements CeliumNode, CeliumClient {
 
 		$b = $this->rabbit->write($request, $this->parentName.'_request');
 
-		if(!$b)
+		if(!$b) {
+			$this->logger->error('Request to the node failed', [
+				'nodeName' => $this->name,
+				'requestBody' => $request,
+				'requestKey' => $requestKey
+			]);
+
 			throw new \Exception("Failed to add the request to the queue");
+		}
+
+		$this->logger->info('Request was sent to the node', [
+			'nodeName' => $this->name,
+			'requestBody' => $request,
+			'requestKey' => $requestKey
+		]);
 
 		return $requestKey;
 	}
@@ -160,6 +201,11 @@ class Pipeline implements CeliumNode, CeliumClient {
 	 */
 	public function notify($message)
 	{
+		$this->logger->info('Node notification sent', [
+			'nodeName' => $this->name,
+			'notifyType' => 'complete'
+		]);
+
 		return $this->rabbit->write($message, $this->name.'_notify');
 	}
 
@@ -174,8 +220,19 @@ class Pipeline implements CeliumNode, CeliumClient {
 		$data['key'] = $key;
 		$status = $this->dataCollection->update(['key' => $key], $data, ['upsert' => true]);
 
-		if($status['ok'] !== 1)
+		if($status['ok'] !== 1) {
+			$this->logger->error('Node data can not save', [
+				'nodeName' => $this->name,
+				'dataKey' => $key
+			]);
+
 			return false;
+		}
+
+		$this->logger->info('Node data saved', [
+			'nodeName' => $this->name,
+			'dataKey' => $key
+		]);
 
 		return true;
 	}
@@ -202,8 +259,21 @@ class Pipeline implements CeliumNode, CeliumClient {
 	{
 		$status = $this->indexCollection->insert(['request_key' => $childRequestKey, 'parent_request_key' => $parentRequestKey]);
 
-		if($status['ok'] !== 1)
+		if($status['ok'] !== 1) {
+			$this->logger->error('Request info can not save into request index', [
+				'nodeName' => $this->name,
+				'requestKey' => $childRequestKey,
+				'parentRequestKey' => $parentRequestKey
+			]);
+
 			return false;
+		}
+
+		$this->logger->info('Request info saved into request index', [
+			'nodeName' => $this->name,
+			'requestKey' => $childRequestKey,
+			'parentRequestKey' => $parentRequestKey
+		]);
 
 		return true;
 	}
@@ -244,8 +314,21 @@ class Pipeline implements CeliumNode, CeliumClient {
 	public function saveRequestCommands($key, array $commands) {
 		$status = $this->commandsCollection->insert(['request_key' => $key, 'request_commands' => $commands]);
 
-		if($status['ok'] !== 1)
+		if($status['ok'] !== 1) {
+			$this->logger->error('Saving requested command failed', [
+				'nodeName' => $this->name,
+				'requestKey' => $key,
+				'commands' => $commands
+			]);
+
 			return false;
+		}
+
+		$this->logger->info('Requested commands saved', [
+			'nodeName' => $this->name,
+			'requestKey' => $key,
+			'commands' => $commands
+		]);
 
 		return true;
 	}

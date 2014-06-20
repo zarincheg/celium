@@ -18,7 +18,7 @@ class Manager extends \Celium\Services\Manager {
 
 	public function __construct($name, $parentName) {
 		$this->node = new Pipeline($name, $parentName);
-		$this->mongo = new \MongoClient(\Celium\Configure::$get->database->mongodb);
+		$this->mongo = new \MongoClient(\Celium\Config::$get->database->mongodb);
 		parent::__construct($name);
 	}
 

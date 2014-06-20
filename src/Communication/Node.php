@@ -5,8 +5,10 @@
  */
 
 namespace Celium\Communication;
-use Celium\Configure;
+use Celium\Config;
+use Celium\DefaultLogger;
 use Celium\Rabbit;
+use Monolog\Logger;
 
 class Node implements CeliumNode {
 	/**
@@ -43,16 +45,27 @@ class Node implements CeliumNode {
 		$this->notifyQueue = $this->rabbit->init($this->name.'_notify');
 		$this->requestQueue = $this->rabbit->init($this->name.'_request', 'r');
 
-		$this->mongo = new \Mongo(Configure::$get->database->mongodb);
+		$this->mongo = new \Mongo(Config::$get->database->mongodb);
 		$this->dataCollection = $this->mongo->nodes->selectCollection($name.'_storage');
 		$this->indexCollection = $this->mongo->nodes->selectCollection($name.'_index');
+
+		$this->logger = new DefaultLogger('node');
 	}
+
+	public function setLogger(Logger $logger) {
+		$this->logger = $logger;
+	}
+
 	/**
 	 * Returning request from service client. For run any actions.
 	 * @return string
 	 */
 	public function request()
 	{
+		$this->logger->info('Receive request from queue', [
+			'nodeName' => $this->name
+		]);
+
 		return json_decode(Rabbit::read($this->requestQueue), true);
 	}
 
@@ -63,6 +76,11 @@ class Node implements CeliumNode {
 	 */
 	public function notify($message)
 	{
+		$this->logger->info('Node notification sent', [
+			'nodeName' => $this->name,
+			'notifyType' => 'complete'
+		]);
+
 		return $this->rabbit->write($message, $this->name.'_notify');
 	}
 
@@ -77,8 +95,19 @@ class Node implements CeliumNode {
 		$data['key'] = $key;
 		$status = $this->dataCollection->update(['key' => $key], $data, ['upsert' => true]);
 
-		if($status['ok'] !== 1)
+		if($status['ok'] !== 1) {
+			$this->logger->error('Node data can not save', [
+				'nodeName' => $this->name,
+				'dataKey' => $key
+			]);
+
 			return false;
+		}
+
+		$this->logger->info('Node data saved', [
+			'nodeName' => $this->name,
+			'dataKey' => $key
+		]);
 
 		return true;
 	}
@@ -103,8 +132,19 @@ class Node implements CeliumNode {
 	{
 		$status = $this->indexCollection->insert(['request_key' => $key]);
 
-		if($status['ok'] !== 1)
+		if($status['ok'] !== 1) {
+			$this->logger->error('Request info can not save into request index', [
+				'nodeName' => $this->name,
+				'requestKey' => $key
+			]);
+
 			return false;
+		}
+
+		$this->logger->info('Request info saved into request index', [
+			'nodeName' => $this->name,
+			'requestKey' => $key
+		]);
 
 		return true;
 	}
