@@ -15,8 +15,13 @@ class Manager extends \Celium\Services\Manager {
 	 */
 	protected $node;
 	protected $mongo;
+	protected $name;
+	protected $parentName;
 
 	public function __construct($name, $parentName) {
+		$this->name = $name;
+		$this->parentName = $name;
+
 		$this->node = new Pipeline($name, $parentName);
 		$this->mongo = new \MongoClient(\Celium\Config::$get->database->mongodb);
 		parent::__construct($name);
@@ -38,6 +43,11 @@ class Manager extends \Celium\Services\Manager {
 	}
 
 	protected function handleRequest(array $request) {
+		$this->logger->info('Handling request from queue', [
+			'node' => $this->name,
+			'parentNode' => $this->parentName
+		]);
+
 		$childRequestKey = $request['key'];
 		// Check the result data in the storage
 		$data = $this->node->checkData($childRequestKey);

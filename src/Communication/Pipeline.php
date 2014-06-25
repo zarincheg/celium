@@ -62,7 +62,7 @@ class Pipeline implements CeliumNode, CeliumClient {
 		$this->notifyQueue = $this->rabbit->init($this->name.'_notify');
 		$this->requestQueue = $this->rabbit->init($this->name.'_request', 'r');
 
-		$this->mongo = new \Mongo(Config::$get->database->mongodb);
+		$this->mongo = new \MongoClient(Config::$get->database->mongodb);
 		$this->dataCollection = $this->mongo->nodes->selectCollection($name.'_storage');
 		$this->indexCollection = $this->mongo->nodes->selectCollection($name.'_index');
 		$this->commandsCollection = $this->mongo->nodes->selectCollection($name.'_commands');
@@ -150,10 +150,6 @@ class Pipeline implements CeliumNode, CeliumClient {
 	 */
 	public function request()
 	{
-		$this->logger->info('Receive request from queue', [
-			'nodeName' => $this->name
-		]);
-
 		return json_decode(Rabbit::read($this->requestQueue), true);
 	}
 
@@ -220,10 +216,11 @@ class Pipeline implements CeliumNode, CeliumClient {
 		$data['key'] = $key;
 		$status = $this->dataCollection->update(['key' => $key], $data, ['upsert' => true]);
 
-		if($status['ok'] !== 1) {
+		if($status['ok'] != 1) {
 			$this->logger->error('Node data can not save', [
 				'nodeName' => $this->name,
-				'dataKey' => $key
+				'dataKey' => $key,
+				'mongoStatus' => $status
 			]);
 
 			return false;
@@ -259,11 +256,12 @@ class Pipeline implements CeliumNode, CeliumClient {
 	{
 		$status = $this->indexCollection->insert(['request_key' => $childRequestKey, 'parent_request_key' => $parentRequestKey]);
 
-		if($status['ok'] !== 1) {
+		if($status['ok'] != 1) {
 			$this->logger->error('Request info can not save into request index', [
 				'nodeName' => $this->name,
 				'requestKey' => $childRequestKey,
-				'parentRequestKey' => $parentRequestKey
+				'parentRequestKey' => $parentRequestKey,
+				'mongoStatus' => $status
 			]);
 
 			return false;
@@ -314,11 +312,12 @@ class Pipeline implements CeliumNode, CeliumClient {
 	public function saveRequestCommands($key, array $commands) {
 		$status = $this->commandsCollection->insert(['request_key' => $key, 'request_commands' => $commands]);
 
-		if($status['ok'] !== 1) {
+		if($status['ok'] != 1) {
 			$this->logger->error('Saving requested command failed', [
 				'nodeName' => $this->name,
 				'requestKey' => $key,
-				'commands' => $commands
+				'commands' => $commands,
+				'mongoStatus' => $status
 			]);
 
 			return false;

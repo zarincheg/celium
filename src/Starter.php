@@ -33,7 +33,7 @@ class Starter {
 	}
 
 	public static function start() {
-		$logger = \Logger::getRootLogger();
+		$logger = new DefaultLogger('starter');
 
 		$longopts = [
 			'node:',
