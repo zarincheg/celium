@@ -79,7 +79,8 @@ class Client implements CeliumClient {
 			$this->logger->error('Request to the node failed', [
 				'nodeName' => $this->name,
 				'requestBody' => $request,
-				'requestKey' => $requestKey
+				'requestKey' => $requestKey,
+				'tags' => ['client-request-failed']
 			]);
 
 			throw new \Exception("Failed to add the request to the queue");
@@ -88,7 +89,8 @@ class Client implements CeliumClient {
 		$this->logger->info('Request was sent to the node', [
 			'nodeName' => $this->name,
 			'requestBody' => $request,
-			'requestKey' => $requestKey
+			'requestKey' => $requestKey,
+			'tags' => ['client-request']
 		]);
 
 		return $requestKey;

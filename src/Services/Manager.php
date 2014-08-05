@@ -17,7 +17,7 @@ class Manager extends \GearmanClient {
 		$this->function = $function;
 
 		if (!$logger) {
-			$this->logger = new DefaultLogger('client');
+			$this->logger = new DefaultLogger('manager');
 		} else {
 			$this->logger = $logger;
 		}

@@ -23,7 +23,7 @@ class Worker extends \GearmanWorker {
 		$this->mongo = new \MongoClient(Config::$get->database->mongodb);
 
 		if (!$logger) {
-			$this->logger = new DefaultLogger('client');
+			$this->logger = new DefaultLogger('worker');
 		} else {
 			$this->logger = $logger;
 		}
