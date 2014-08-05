@@ -10,7 +10,7 @@ class CommandRegistry {
 	static public function get($command, $params = []) {
 		if(!isset(self::$list[$command])) {
 			$logger = \Logger::getRootLogger();
-			$logger->fatal('Command not found: '.$command);
+			$logger->fatal('Command not found', ['command' => $command]);
 			throw new \Exception("Command not found");
 		}
 

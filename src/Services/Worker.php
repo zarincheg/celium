@@ -44,7 +44,8 @@ class Worker extends \GearmanWorker {
 		
 		$this->logger->info('Node worker starting', [
 			'server' => $server,
-			'binding' => $this->function
+			'binding' => $this->function,
+			'tags' => ['start', 'worker']
 		]);
 
 		while($this->work()) {

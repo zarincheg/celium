@@ -54,7 +54,7 @@ class Manager extends \Celium\Services\Manager {
 
 		if($data) {
 			$this->node->notify(json_encode(['data_key' => $childRequestKey, 'request_key' => $childRequestKey]));
-			$this->logger->info('Result data found, notification sent: '.$childRequestKey);
+			$this->logger->info('Result data found, notification sent', ['child_request_key' => $childRequestKey]);
 
 			return true;
 		}
@@ -75,17 +75,17 @@ class Manager extends \Celium\Services\Manager {
 			// + универсальный воркер по идее будет
 			$this->node->saveRequestCommands($childRequestKey, $request['commands']);
 		} else {
-			$this->logger->info('Trying to add duplicate task: '.$childRequestKey);
+			$this->logger->info('Trying to add duplicate task', ['child_request_key' => $childRequestKey]);
 		}
 	}
 
 	protected function handleNotify($notify) {
-		$this->logger->info('Response from parent node received. Key: '.$notify['data_key']);
+		$this->logger->info('Response from parent node received', ['key' => $notify['data_key']]);
 		// @todo Может быть и данные в воркерах получать?
 		$parentData = $this->node->getData($notify['data_key']); // data_key
 
 		if(!$parentData) {
-			$this->logger->warn('In the parent node data not found. Key: '.$notify['data_key']);
+			$this->logger->warn('In the parent node data not found', ['key' => $notify['data_key']]);
 		} else {
 			// request_key по нему выкупаем ключи запросов клиентов из индекса. И потом он ухдит как dataKey
 			// Это нужно потому что мы выполняем запрос по обработке данных из родительского узла. Но отвечать нам нужно на запрос из дочернего.
@@ -113,7 +113,7 @@ class Manager extends \Celium\Services\Manager {
 	 * @return string
 	 */
 	protected function prepareRequest(array $request) {
-		$this->logger->debug('Prepare request to parent node: '. md5($request['key']));
+		$this->logger->debug('Prepare request to parent node', ['key' => md5($request['key'])]);
 		return $this->node->sendRequest(json_encode($request));
 	}
 }

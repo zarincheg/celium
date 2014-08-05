@@ -45,7 +45,8 @@ class Manager extends \GearmanClient {
 
 		$this->logger->info('Node manager starting', [
 			'server' => $server,
-			'binding' => $this->function
+			'binding' => $this->function,
+			'tags' => ['start', 'manager']
 		]);
 
 		while(true) {

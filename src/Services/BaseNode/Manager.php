@@ -33,7 +33,7 @@ class Manager extends \Celium\Services\Manager {
 
 		if($data) {
 			$this->node->notify(json_encode(['data_key' => $requestKey, 'request_key' => $requestKey]));
-			$this->logger->info('Result data found, notification sent: '.$requestKey);
+			$this->logger->info('Result data found, notification sent', ['request_key' => $requestKey]);
 
 			return true;
 		}
@@ -44,9 +44,9 @@ class Manager extends \Celium\Services\Manager {
 		if(!$this->node->checkIndex($requestKey)) {
 			$this->node->addToIndex($requestKey);
 			$this->addTaskBackground($this->function, $workload);
-			$this->logger->info('The task was added: '.$requestKey);
+			$this->logger->info('Task added', ['request_key' => $requestKey]);
 		} else {
-			$this->logger->info('Trying to add duplicate task: '.$requestKey);
+			$this->logger->info('Trying to add duplicate task', ['request_key' => $requestKey]);
 		}
 
 		return parent::process();
